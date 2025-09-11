@@ -1,5 +1,5 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { getReport, upsertReport } from '../services/report.service.js';
+import { getReport, upsertReport } from '../services/report.services.js';
 
 /**
  * Get report of current user (user id can come from auth or path)

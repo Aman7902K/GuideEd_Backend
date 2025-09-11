@@ -1,6 +1,6 @@
 import AssessmentReport from '../models/assessmentreport.model.js';
-import { matchCareers, deriveSkillGaps } from './career.service.js';
-import { buildLearningPath, buildActionPlan, inferPersonalityType } from './traits.service.js';
+import { matchCareers, deriveSkillGaps } from './career.services.js';
+import { buildLearningPath, buildActionPlan, inferPersonalityType } from './traits.services.js';
 
 export async function upsertReport({ userId, overallAnalysis, strengths, weaknesses, interests, averageScore }) {
   const topCareerMatches = matchCareers({ strengths, interests, averageScore });

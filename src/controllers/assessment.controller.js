@@ -1,25 +1,28 @@
 import AssessmentAttempt from '../models/assessmentattempt.model.js';
 import Question from '../models/question.model.js';
-import { evaluateAnswer } from '../services/gemini.service.js';
-import { aggregateAnswers } from '../services/scoring.service.js';
-import { upsertReport } from '../services/report.service.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
+import { evaluateAnswer } from '../services/gemini.services.js';
+import { aggregateAnswers } from '../services/scoring.services.js';
+import { upsertReport } from '../services/report.services.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
-/**
- * NOTE: Assumes req.user.id is set by auth middleware.
- * Fallback to body userId for development if not present.
- */
+
 
 export const startAssessment = asyncHandler(async (req, res) => {
-  const userId = req.user?.id || req.body.userId;
-  if (!userId) return res.status(401).json({ success: false, message: 'User not authenticated.' });
+  const userId =
+    req.user?.id ??
+    req.body?.userId ??
+    req.header('x-user-id') ??
+    req.query?.userId;
+
+  if (!userId) {
+    return res.status(401).json({ success: false, message: 'User not authenticated.' });
+  }
 
   const existing = await AssessmentAttempt.findOne({ userId, status: 'in_progress' });
   if (existing) {
     return res.json({ success: true, data: existing, message: 'Existing attempt returned.' });
   }
 
-  // Random 10 questions (tweak size as needed)
   const questions = await Question.aggregate([{ $sample: { size: 10 } }]);
   if (!questions.length) {
     return res.status(500).json({ success: false, message: 'No questions available.' });

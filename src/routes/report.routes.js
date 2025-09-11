@@ -3,10 +3,10 @@ import { getMyReport, regenerateReport } from '../controllers/report.controller.
 
 const router = Router();
 
-// GET /api/report/mine/:userId?   (userId optional if auth middleware supplies req.user.id)
-router.get('/mine/:userId?', getMyReport);
+// Two explicit routes instead of an optional param
+router.get('/mine', getMyReport);         // current user
+router.get('/mine/:userId', getMyReport); // specific user
 
-// POST /api/report/regenerate
 router.post('/regenerate', regenerateReport);
 
 export default router;

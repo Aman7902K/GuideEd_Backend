@@ -8,16 +8,10 @@ import {
 
 const router = Router();
 
-// POST /api/assessment/start
+// These paths are relative to how you mount the router in app.js
 router.post('/start', startAssessment);
-
-// POST /api/assessment/answer
 router.post('/answer', submitAnswer);
-
-// POST /api/assessment/finalize
 router.post('/finalize', finalizeAssessment);
-
-// GET /api/assessment/attempt/:id
 router.get('/attempt/:id', getAttempt);
 
 export default router;
