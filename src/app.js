@@ -4,7 +4,12 @@ import cookieParser from "cookie-parser"
 
 const app = express()
 
-app.use(cors())
+app.use(cors(
+    {
+    origin: 'http://localhost:3000', // The address of your Next.js app
+    credentials: true                 // Required to allow cookies and headers
+}
+))
 
 app.use(express.json({limit:"16kb"}))
 app.use(express.urlencoded({extended:true,limit:"16kb"}))
