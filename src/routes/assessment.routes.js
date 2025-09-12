@@ -1,17 +1,20 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   startAssessment,
   submitAnswer,
   finalizeAssessment,
   getAttempt
 } from '../controllers/assessment.controller.js';
+import { requireAuth } from '../middlewares/auth.middleware.js';
 
-const router = Router();
+const router = express.Router();
 
-// These paths are relative to how you mount the router in app.js
+// Protect all assessment routes
+router.use(requireAuth);
+
 router.post('/start', startAssessment);
 router.post('/answer', submitAnswer);
 router.post('/finalize', finalizeAssessment);
-router.get('/attempt/:id', getAttempt);
+router.get('/:id', getAttempt);
 
 export default router;
