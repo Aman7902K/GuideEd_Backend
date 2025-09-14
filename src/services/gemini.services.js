@@ -1,11 +1,7 @@
-/**
- * Gemini (Google Generative AI) evaluation wrapper.
- * Replace axios call with official SDK if you prefer.
- */
 import axios from 'axios';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
+const GEMINI_API_KEY = "AIzaSyC5Ps_Q3FI5Z0CNcFzbix31R5YNC3-Plwo";
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 function buildPrompt({ question, idealAnswer, userAnswer }) {
   return `
@@ -20,14 +16,18 @@ ${idealAnswer}
 User's Answer:
 ${userAnswer}
 
-Evaluate and respond ONLY with strict JSON:
+Respond ONLY with a single valid JSON object like this (no extra text):
 {
-  "correctnessScore": <0..1>,
+  "correctnessScore": 0.0,
   "feedback": "short constructive feedback",
   "inferredSkills": ["skill1","skill2"],
   "inferredInterests": ["interest1","interest2"]
 }
 `;
+}
+
+function clamp(v, min, max) {
+  return Math.min(Math.max(v, min), max);
 }
 
 export async function evaluateAnswer({ question, idealAnswer, userAnswer }) {
@@ -37,16 +37,15 @@ export async function evaluateAnswer({ question, idealAnswer, userAnswer }) {
     const resp = await axios.post(
       `${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`,
       { contents: [{ parts: [{ text: prompt }] }] },
-      { timeout: 20000 }
+      { timeout: 30000 }
     );
 
-    const raw = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    let parsed;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
-      parsed = {};
-    }
+    const raw = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    console.log("Raw Gemini output:", raw); // ← important to debug
+
+    // Extract JSON using regex, so even if extra text exists it works
+    const match = raw.match(/\{.*\}/s);
+    const parsed = match ? JSON.parse(match[0]) : {};
 
     return {
       correctnessScore: clamp(parsed.correctnessScore ?? 0, 0, 1),
@@ -55,7 +54,7 @@ export async function evaluateAnswer({ question, idealAnswer, userAnswer }) {
       inferredInterests: Array.isArray(parsed.inferredInterests) ? parsed.inferredInterests.slice(0, 5) : []
     };
   } catch (e) {
-    console.error('Gemini evaluation error:', e.message);
+    console.error('Gemini evaluation error:', e.response?.data || e.message);
     return {
       correctnessScore: 0,
       feedback: 'Evaluation failed.',
@@ -65,6 +64,12 @@ export async function evaluateAnswer({ question, idealAnswer, userAnswer }) {
   }
 }
 
-function clamp(v, min, max) {
-  return Math.min(Math.max(v, min), max);
-}
+// TEST
+(async () => {
+  const result = await evaluateAnswer({
+    question: "What is the main function of an operating system?",
+    idealAnswer: "To manage hardware and software resources",
+    userAnswer: "To manage hardware and software resources"
+  });
+  console.log(result);
+})();

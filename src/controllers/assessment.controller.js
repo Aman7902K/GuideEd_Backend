@@ -11,11 +11,8 @@ export const startAssessment = asyncHandler(async (req, res) => {
     return res.status(401).json({ success: false, message: 'User not authenticated.' });
   }
 
-  // Return existing in-progress attempt if present
-  const existing = await AssessmentAttempt.findOne({ userId, status: 'in_progress' });
-  if (existing) {
-    return res.json({ success: true, data: existing, message: 'Existing attempt returned.' });
-  }
+  // Delete any existing in-progress attempt for this user
+  await AssessmentAttempt.deleteMany({ userId, status: 'in_progress' });
 
   // Sample up to 10 questions safely
   const totalQuestions = await Question.countDocuments();
@@ -46,7 +43,6 @@ export const startAssessment = asyncHandler(async (req, res) => {
     }
   });
 });
-
 export const submitAnswer = asyncHandler(async (req, res) => {
   const userId = req.user?.id;
   const { attemptId, questionId, userAnswer } = req.body;
