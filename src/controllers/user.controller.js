@@ -5,7 +5,7 @@ import User from "../models/user.model.js";
 
 const registerUser = asyncHandler(async (req, res) => {
     // 1. Get user details from request body
-    const { name, email, password } = req.body;
+    const { name, email, password,location } = req.body;
 
     // 2. Validate that no fields are empty
     if ([name, email, password].some((field) => field?.trim() === "")) {
@@ -24,6 +24,7 @@ const registerUser = asyncHandler(async (req, res) => {
         name,
         email,
         password,
+        location,
         authProvider: 'email', // As defined in your schema
     });
 
