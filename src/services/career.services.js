@@ -1,50 +1,100 @@
-/**
- * Simple rule-based career matching (placeholder).
- * If you already have careerpath.model.js you can integrate dynamic data.
- */
+// career.services.js
 
-const CAREERS = [
-  {
-    career: 'Software Engineer',
-    requiredSkills: ['problem-solving', 'analytical', 'algorithms', 'communication'],
-    industryTrends: { growth: 'High', demand: 'High', averageSalary: '$70k-$150k' },
-    description: 'Build and maintain software systems.',
-    educationPath: 'CS degree or bootcamp + portfolio'
-  },
-  {
-    career: 'Data Analyst',
-    requiredSkills: ['data-analysis', 'statistics', 'excel', 'sql'],
-    industryTrends: { growth: 'Moderate', demand: 'High', averageSalary: '$60k-$110k' },
-    description: 'Interpret data for decisions.',
-    educationPath: 'Stats / Data courses + SQL practice'
-  },
-  {
-    career: 'UX Designer',
-    requiredSkills: ['design-thinking', 'empathy', 'communication', 'prototyping'],
-    industryTrends: { growth: 'Moderate', demand: 'High', averageSalary: '$65k-$120k' },
-    description: 'Design intuitive user experiences.',
-    educationPath: 'Design courses + portfolio'
-  }
-];
+import axios from 'axios';
 
-export function matchCareers({ strengths, interests, averageScore }) {
-  return CAREERS.map(c => {
-    const overlap = c.requiredSkills.filter(rs => strengths.includes(rs));
-    const base = overlap.length / c.requiredSkills.length;
-    const interestBoost = interests.some(i => c.career.toLowerCase().includes(i.toLowerCase())) ? 0.05 : 0;
-    const total = Math.min(1, base * 0.7 + averageScore * 0.25 + interestBoost);
+// Gemini API details
+const GEMINI_API_URL =  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_KEY = "AIzaSyC5Ps_Q3FI5Z0CNcFzbix31R5YNC3-Plwo";
+
+export const generateCareerInsights = async (report) => {
+  try {
+    // Generate Career Insights
+    const careerPrompt = createCareerPrompt(report);
+    const careerResponse = await callGeminiAPI(careerPrompt);
+    const careerInsights = parseGeminiResponse(careerResponse);
+
+    // Generate Nearby Colleges based on location
+    const locationPrompt = createLocationPrompt(report);
+    const locationResponse = await callGeminiAPI(locationPrompt);
+    const nearbyColleges = parseGeminiResponse(locationResponse);
+
     return {
-      career: c.career,
-      matchPercentage: Math.round(total * 100),
-      requiredSkills: c.requiredSkills,
-      industryTrends: c.industryTrends,
-      description: c.description,
-      educationPath: c.educationPath
+      topCareerPaths: careerInsights.topCareerPaths || [],
+      learningPath: careerInsights.learningPath || [],
+      actionPlan: careerInsights.actionPlan || [],
+      nearbyColleges: nearbyColleges.nearbyColleges || []
     };
-  }).sort((a, b) => b.matchPercentage - a.matchPercentage).slice(0, 3);
+
+  } catch (error) {
+    console.error('Gemini API error:', error.message);
+    return {
+      topCareerPaths: [],
+      learningPath: [],
+      actionPlan: [],
+      nearbyColleges: []
+    };
+  }
+};
+
+async function callGeminiAPI(prompt) {
+  const response = await axios.post(
+    GEMINI_API_URL,
+    {
+      prompt: prompt,
+      max_tokens: 1000,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GEMINI_API_KEY}`
+      },
+      timeout: 10000
+    }
+  );
+
+  if (response.status !== 200 || !response.data) {
+    throw new Error('Invalid response from Gemini');
+  }
+  return response.data;
 }
 
-export function deriveSkillGaps(strengths, topCareers) {
-  const needed = new Set(topCareers.flatMap(c => c.requiredSkills));
-  return Array.from(needed).filter(s => !strengths.includes(s));
+function createCareerPrompt(report) {
+  return `
+You are an expert career counselor. Based on the following assessment data, recommend the top career paths, learning paths, and action plans.
+
+User Interests: ${report.interests.join(', ')}
+User Strengths: ${report.strengths.join(', ') || 'None'}
+User Weaknesses: ${report.weaknesses.join(', ')}
+
+Please generate:
+1. Top 3 career paths with explanations, required skills, and industries.
+2. Recommended learning path steps for the next 6 months.
+3. A structured action plan with timelines.
+
+Provide the output in JSON format with fields: topCareerPaths, learningPath, actionPlan.
+`;
+}
+
+function createLocationPrompt(report) {
+  const state = report.userLocation?.state || 'your state';
+  return `
+You are an education consultant. Provide a list of the top 10 colleges in the state of ${state} in India.  
+For each college, include:
+- Name of the college
+- Website link
+
+Please provide the response in JSON format as an object named "nearbyColleges", with each entry containing "name" and "website".
+`;
+}
+
+function parseGeminiResponse(data) {
+  try {
+    if (typeof data === 'string') {
+      return JSON.parse(data);
+    }
+    return data;
+  } catch (error) {
+    console.error('Parsing Gemini response failed:', error.message);
+    return {};
+  }
 }
