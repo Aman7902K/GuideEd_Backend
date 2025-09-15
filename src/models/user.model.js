@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true, // Allows multiple documents to have a null value for this field
+  },
+  location:{
+    type:String,
+    required:true
   }
 }, {
   // Automatically adds createdAt and updatedAt fields

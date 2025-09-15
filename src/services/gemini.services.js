@@ -65,11 +65,11 @@ export async function evaluateAnswer({ question, idealAnswer, userAnswer }) {
 }
 
 // TEST
-(async () => {
-  const result = await evaluateAnswer({
-    question: "What is the main function of an operating system?",
-    idealAnswer: "To manage hardware and software resources",
-    userAnswer: "To manage hardware and software resources"
-  });
-  console.log(result);
-})();
+// (async () => {
+//   const result = await evaluateAnswer({
+//     question: "What is the main function of an operating system?",
+//     idealAnswer: "To manage hardware and software resources",
+//     userAnswer: "To manage hardware and software resources"
+//   });
+//   console.log(result);
+// })();
