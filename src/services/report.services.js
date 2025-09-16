@@ -1,12 +1,9 @@
-// report.services.js
-
 import AssessmentReport from '../models/assessmentreport.model.js';
 import { generateCareerInsights } from './career.services.js';
 import { buildLearningPath, buildActionPlan, inferPersonalityType } from './traits.services.js';
 
-// Upsert or create the assessment report
-export async function upsertReport({ userId, overallAnalysis, strengths, weaknesses, interests, averageScore, userLocation }) {
-  // Generate career insights and nearby colleges using Gemini
+export async function upsertReport({ userId, overallAnalysis, strengths = [], weaknesses = [], interests = [], averageScore, userLocation = {} }) {
+  // Generate career insights + interest-aware nearby colleges
   const careerData = await generateCareerInsights({
     strengths,
     weaknesses,
@@ -15,33 +12,30 @@ export async function upsertReport({ userId, overallAnalysis, strengths, weaknes
     userLocation
   });
 
-  // Derive personality type and other traits if needed
   const personalityType = inferPersonalityType({ strengths, interests, averageScore });
 
-  // Optionally build learning path and action plan using traits service, fallback if Gemini is incomplete
-  const recommendedLearningPath = careerData.learningPath.length > 0 
-    ? careerData.learningPath 
+  const recommendedLearningPath = Array.isArray(careerData.learningPath) && careerData.learningPath.length > 0
+    ? careerData.learningPath
     : buildLearningPath([]);
 
-  const actionPlan = careerData.actionPlan.length > 0 
-    ? careerData.actionPlan 
+  const actionPlan = Array.isArray(careerData.actionPlan) && careerData.actionPlan.length > 0
+    ? careerData.actionPlan
     : buildActionPlan([]);
 
   const doc = {
     overallAnalysis,
     topCareerMatches: careerData.topCareerPaths || [],
-    skillGaps: [], // You may integrate deriveSkillGaps if needed
+    skillGaps: [], // Consider adding deriveSkillGaps in the future
     recommendedLearningPath,
     actionPlan,
     personalityType,
     interests,
     strengths,
     weaknesses,
-    nearbyColleges: careerData.nearbyColleges || [],
+    nearbyColleges: Array.isArray(careerData.nearbyColleges) ? careerData.nearbyColleges : [],
     completedAt: new Date()
   };
 
-  // Find existing report and update or create a new one
   const existing = await AssessmentReport.findOne({ userId });
   if (existing) {
     Object.assign(existing, doc);
@@ -51,7 +45,6 @@ export async function upsertReport({ userId, overallAnalysis, strengths, weaknes
   return AssessmentReport.create({ userId, ...doc });
 }
 
-// Retrieve the report by userId
 export function getReport(userId) {
   return AssessmentReport.findOne({ userId });
 }

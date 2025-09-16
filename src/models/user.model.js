@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
   },
   // This field can be used to store the provider, e.g., 'email', 'google'
   authProvider: {
-    type: String,
+    type: String,     
     required: true,
     enum: ['email', 'google'],
     default: 'email',

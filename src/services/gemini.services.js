@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const GEMINI_API_KEY = "AIzaSyC5Ps_Q3FI5Z0CNcFzbix31R5YNC3-Plwo";
+const GEMINI_API_KEY = "AIzaSyDv-3LO98zDg9tg4I41ReJF_jXK7B5M49o";
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 function buildPrompt({ question, idealAnswer, userAnswer }) {

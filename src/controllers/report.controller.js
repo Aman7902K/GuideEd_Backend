@@ -1,5 +1,3 @@
-// report.controller.js
-
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { getReport, upsertReport } from '../services/report.services.js';
 import { generateCareerInsights } from '../services/career.services.js';
