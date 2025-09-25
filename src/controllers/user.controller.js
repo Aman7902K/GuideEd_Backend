@@ -63,17 +63,14 @@ const loginUser = asyncHandler(async (req, res) => {
     // 4. Generate access and refresh tokens
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
-
     // 5. Save refresh token to the database and remove password from output
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
     const loggedInUser = await User.findById(user._id).select("-password");
-
     const options = {
         httpOnly: true,
         secure: true // Set to true in production
     }
-
     // 6. Send tokens via cookies and as a JSON response
     return res
         .status(200)
@@ -87,5 +84,4 @@ const loginUser = asyncHandler(async (req, res) => {
             )
         );
 });
-
 export { registerUser,loginUser  };
