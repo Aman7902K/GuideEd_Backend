@@ -227,6 +227,12 @@
             
             if (!window.google) {
                 console.error('Google Maps API not loaded');
+                const locationInfo = document.querySelector('.location-info');
+                if (locationInfo) {
+                    locationInfo.textContent = '⚠️ Location autocomplete unavailable. Please enter your location manually.';
+                    locationInfo.style.color = '#856404';
+                    locationInfo.style.backgroundColor = '#fff3cd';
+                }
                 return;
             }
 
@@ -284,6 +290,7 @@
             }
 
             try {
+                // API endpoint - Update this URL if your backend runs on a different host/port
                 const response = await fetch('http://localhost:8000/api/v1/users/register', {
                     method: 'POST',
                     headers: {
