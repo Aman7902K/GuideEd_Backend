@@ -1,6 +1,6 @@
-# React UI with Google Maps API Integration
+# User Registration UI with Google Maps API Integration
 
-This directory contains a simple React UI for user registration with Google Maps Places Autocomplete integration.
+This directory contains a simple, responsive user registration form with Google Maps Places Autocomplete integration.
 
 ## Setup Instructions
 
