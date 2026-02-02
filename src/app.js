@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.routes.js";
 import assessmentRouter from "./routes/assessment.routes.js";
 import reportRouter from "./routes/report.routes.js";
+import carMaintenanceRouter from "./routes/carmaintenance.routes.js";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use((req, res, next) => {
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/assessment", assessmentRouter); // POST /api/v1/assessment/start
 app.use("/api/v1/report", reportRouter);
+app.use("/api/v1/car-maintenance", carMaintenanceRouter);
 
 // Health
 app.get("/health", (_req, res) => res.json({ ok: true }));
