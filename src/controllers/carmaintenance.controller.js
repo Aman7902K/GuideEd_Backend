@@ -88,6 +88,11 @@ const getAllRecords = asyncHandler(async (req, res) => {
 const getRecordById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
+  // Validate MongoDB ObjectId format
+  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+    throw new ApiError(400, "Invalid maintenance record ID format");
+  }
+
   const record = await CarMaintenance.findById(id);
 
   if (!record) {

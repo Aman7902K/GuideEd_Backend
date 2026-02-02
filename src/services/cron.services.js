@@ -58,6 +58,8 @@ const checkAndSendReminders = async () => {
 export const initCronJobs = () => {
   // Run every day at 9:00 AM
   // Format: second minute hour day month weekday
+  // Timezone examples: "Asia/Kolkata", "America/New_York", "Europe/London", "UTC"
+  // See full list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   cron.schedule("0 9 * * *", checkAndSendReminders, {
     timezone: "Asia/Kolkata", // Adjust timezone as needed
   });
