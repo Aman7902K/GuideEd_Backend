@@ -3,6 +3,7 @@ import { Transaction } from "../models/transaction.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import mongoose from "mongoose";
 
 /**
  * Get all ledger entries
@@ -67,7 +68,7 @@ const getLedgerEntryById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   // Validate MongoDB ObjectId format
-  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid ledger entry ID format");
   }
 

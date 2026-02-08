@@ -4,6 +4,7 @@ import { Ledger } from "../models/ledger.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import mongoose from "mongoose";
 
 /**
  * Create a new transaction (Sale or Purchase)
@@ -38,8 +39,13 @@ const createTransaction = asyncHandler(async (req, res) => {
   const processedItems = [];
   let totalAmount = 0;
 
+  // Fetch all products at once for better performance
+  const productIds = items.map(item => item.product);
+  const products = await Product.find({ _id: { $in: productIds } });
+  const productMap = new Map(products.map(p => [p._id.toString(), p]));
+
   for (const item of items) {
-    const product = await Product.findById(item.product);
+    const product = productMap.get(item.product);
     if (!product) {
       throw new ApiError(404, `Product with ID ${item.product} not found`);
     }
@@ -189,7 +195,7 @@ const getTransactionById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   // Validate MongoDB ObjectId format
-  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid transaction ID format");
   }
 
