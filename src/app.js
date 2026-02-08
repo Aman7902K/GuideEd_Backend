@@ -6,6 +6,9 @@ import userRouter from "./routes/user.routes.js";
 import assessmentRouter from "./routes/assessment.routes.js";
 import reportRouter from "./routes/report.routes.js";
 import carMaintenanceRouter from "./routes/carmaintenance.routes.js";
+import productRouter from "./routes/product.routes.js";
+import transactionRouter from "./routes/transaction.routes.js";
+import ledgerRouter from "./routes/ledger.routes.js";
 
 const app = express();
 
@@ -35,6 +38,9 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/assessment", assessmentRouter); // POST /api/v1/assessment/start
 app.use("/api/v1/report", reportRouter);
 app.use("/api/v1/car-maintenance", carMaintenanceRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/transactions", transactionRouter);
+app.use("/api/v1/ledger", ledgerRouter);
 
 // Health
 app.get("/health", (_req, res) => res.json({ ok: true }));
